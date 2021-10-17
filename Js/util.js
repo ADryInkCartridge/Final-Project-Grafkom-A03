@@ -48,14 +48,20 @@ function resetTag(cubes) {
 
 function cLane(key){
     if(key == 'ArrowLeft'){
+        console.log('left')
         changing = 1 
-        lane -= 1
+        if(lane != 0)
+            lane -= 1
+        
     }
     if(key == 'ArrowRight'){
+        console.log('right')
         changing = 1 
-        lane += 1
+        if(lane != 2)
+            lane += 1
     }
     if(key == 'ArrowUp'){
+        console.log('ArrowUp')
         if(!jumping){
             changing = 1 
             jumping = 1
@@ -89,6 +95,7 @@ window.addEventListener("resize", () => {
 function ballAnimation(){
     ball.rotation.x +=0.05
     if(changing == 1){
+        console.log(lane)
         if(ball.position.x!=lanes[lane][0]){
             if(ball.position.x < lanes[lane][0])
                 ball.position.x += 0.5

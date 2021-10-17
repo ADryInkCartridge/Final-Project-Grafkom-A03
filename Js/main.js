@@ -25,7 +25,6 @@ renderer.setSize( size.w , size.h);
 renderer.setPixelRatio(window.devicePixelRatio);
 
 
-obj = []
 var clock = new THREE.Clock();
 var time = 0
 var delta = 0
@@ -36,50 +35,76 @@ var lanes = [[-10,0,-100],[0,0,-100],[10,0,-100]]
 
 
 
-ball = createBall(0xdfdfdf)
-scene.add(ball)
-
-
 var changing = 0
 var lane = 1
 var jumping = 0
 var press = 0
-var hmax = 8
+const hmax = 8
 var gameover = 0
 var jumpStartTime = 0
 
 scoreHTML.innerHTML = ("Score: " + 0)
-document.addEventListener('keydown',(e)=>{
-  if (press==0)
-    animate()
-  press++
-  var key = e.code;
-  cLane(key)
+start.addEventListener('click',(e)=> {
+  gameloop()
 })
 
-randCube()
-
-function animate(){ 
-  score++
-  scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
-  if (speed <= 0.4)
-    speed+=0.005
-  obj.forEach((o, index, object)=>{
-    collision(o.position.x,o.position.y,o.position.z)
-    o.position.z += speed
-    if(o.position.z >= 5) {
-      scene.remove(o)
-      object.splice(index, 1);
+function gameloop() {
+  const x = document
+  x.addEventListener('keydown', res)
+  
+  function res(e){
+    if (press==0)
+      animate()
+    press++
+    var key = e.code;
+    cLane(key)
+  }
+  
+  scoreHTML.innerHTML = ("Score: " + 0)
+  while(scene.children.length > 0){ 
+    scene.remove(scene.children[0]); 
+  }
+  obj = []
+  time = 0
+  lane = 1
+  delta = 0
+  changing = 0
+  jumping = 0
+  speed = 0.2
+  press = 0
+  score = 0
+  jumpStartTime = 0
+  gameover = 0
+  ball = createBall(0xf9f9f9)
+  scene.add(ball)
+  randCube()
+  
+  function animate(){ 
+    score++
+    scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
+    if (speed <= 0.4)
+      speed+=0.005
+    obj.forEach((o, index, object)=>{
+      collision(o.position.x,o.position.y,o.position.z)
+      o.position.z += speed
+      if(o.position.z >= 5) {
+        scene.remove(o)
+        object.splice(index, 1);
+      } 
+    })
+    if(obj[obj.length-1].position.z >= - 80){
+      randCube()
     } 
-  })
-  if(obj[obj.length-1].position.z >= - 80){
-    randCube()
-  } 
-  console.log(ball.position)
-  if(!gameover){
-    ballAnimation()
-    renderer.render(scene,camera)
-    requestAnimationFrame(animate);
+    console.log(ball.position)
+    if(!gameover){
+      ballAnimation()
+      renderer.render(scene,camera)
+      requestAnimationFrame(animate);
+    }
+    else {
+      x.removeEventListener("keydown", res);
+      return
+    }
   }
 }
 
