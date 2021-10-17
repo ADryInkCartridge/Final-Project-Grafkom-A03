@@ -5,6 +5,7 @@ function radInt(min, max) {
 }
 
 function createCube(color) { 
+    console.log(color)
     const cube = new THREE.Mesh(
       new THREE.BoxGeometry(3, 3, 3),
       new THREE.MeshBasicMaterial({ color: color })
@@ -19,7 +20,7 @@ function createCube(color) {
 function createBall(color) { 
     const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(3, 32, 32),
-      new THREE.MeshBasicMaterial({ color: 0xffffff })
+      new THREE.MeshBasicMaterial({ color: color })
     );
     sphere.position.set(0,0,-5)
     return sphere;
@@ -30,6 +31,7 @@ function randColorGen(i) {
     for (x = 0; x < i; x ++){
         arr.push(Math.floor(Math.random()*16777215));
     }
+    // console.log(arr)
     return arr;
 }
 
@@ -72,7 +74,7 @@ function cLane(key){
 function randCube(){
     amt = radInt(1,3)
     for (i = 0; i<amt ; i++) {
-        cube = createCube(colors)
+        cube = createCube(colors[radInt(0,9)])
         obj.push(cube)
         scene.add(cube)
     }

@@ -33,8 +33,6 @@ var score = 0
 const colors = randColorGen(10);
 var lanes = [[-10,0,-100],[0,0,-100],[10,0,-100]] 
 
-
-
 var changing = 0
 var lane = 1
 var jumping = 0
@@ -75,7 +73,7 @@ function gameloop() {
   score = 0
   jumpStartTime = 0
   gameover = 0
-  ball = createBall(0xf9f9f9)
+  ball = createBall(0x007BC0)
   scene.add(ball)
   randCube()
   
