@@ -19,7 +19,7 @@ function createCube(color) {
 function createBall(color) { 
     const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(3, 32, 32),
-      new THREE.MeshPhongMaterial({ color: color })
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
     sphere.position.set(0,0,-5)
     return sphere;
@@ -41,27 +41,23 @@ function coupling(colors) {
 function resetTag(cubes) {
     for (const cube of cubes) {
         cube.tag = false
-        // console.log(cube)
         cube.material.color.set(cube.oldcolor)
     }
 }
 
 function cLane(key){
     if(key == 'ArrowLeft'){
-        console.log('left')
         changing = 1 
         if(lane != 0)
             lane -= 1
         
     }
     if(key == 'ArrowRight'){
-        console.log('right')
         changing = 1 
         if(lane != 2)
             lane += 1
     }
     if(key == 'ArrowUp'){
-        console.log('ArrowUp')
         if(!jumping){
             changing = 1 
             jumping = 1
@@ -71,7 +67,6 @@ function cLane(key){
         }
         
     }
-    console.log(lane)
 }
 
 function randCube(){
@@ -95,7 +90,6 @@ window.addEventListener("resize", () => {
 function ballAnimation(){
     ball.rotation.x +=0.05
     if(changing == 1){
-        console.log(lane)
         if(ball.position.x!=lanes[lane][0]){
             if(ball.position.x < lanes[lane][0])
                 ball.position.x += 0.5
@@ -120,8 +114,6 @@ function ballAnimation(){
 
 function collision(x,y,z){
     if (Math.abs(ball.position.x - x) < 3 && Math.abs(ball.position.y - y) < 3  && Math.abs(ball.position.z - z) < 3){
-        console.log(x,y,z)
-        console.log('dead')
         gameover = 1;
     }
 }

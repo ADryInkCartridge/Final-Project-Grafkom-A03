@@ -95,7 +95,6 @@ function gameloop() {
     if(obj[obj.length-1].position.z >= - 80){
       randCube()
     } 
-    console.log(ball.position)
     if(!gameover){
       ballAnimation()
       renderer.render(scene,camera)
