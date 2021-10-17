@@ -26,14 +26,13 @@ function createBall(color) {
     return sphere;
 };
 
-// function createRoad(color) { 
-//     const road = new THREE.Mesh(
-//       new THREE.PlaneGeometry(5, 5),
-//       new THREE.MeshBasicMaterial({ color: color })
-//     );
-//     road.position.set(0,0,-5)
-//     return road;
-// };
+function createRoad(color) { 
+    const road = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 5000),
+      new THREE.MeshPhongMaterial({ color: color })
+    );
+    return road;
+};
 
 function randColorGen(i) {
     var arr = []

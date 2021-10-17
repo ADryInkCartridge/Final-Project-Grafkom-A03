@@ -75,9 +75,13 @@ function gameloop() {
   gameover = 0
   ball = createBall(0x007BC0)
   scene.add(ball)
-  // scene.add(createRoad(0x007BC0))
+  road = createRoad(0x557BC0)
+  road.position.set(0, -5, -5)
+  road.rotation.x = 270 * (pi/180);
+  // road.rotation.z = 3 * (pi/180);
+  scene.add(road)
   const light = new THREE.DirectionalLight( 0xffffff, 0.85 );
-  light.position.set( 0, 5, 5 );
+  light.position.set( 0, 5, 5 )
   scene.add( light );
   randCube()
   
