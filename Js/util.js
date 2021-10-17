@@ -5,10 +5,10 @@ function radInt(min, max) {
 }
 
 function createCube(color) { 
-    console.log(color)
+    // console.log(color)
     const cube = new THREE.Mesh(
       new THREE.BoxGeometry(3, 3, 3),
-      new THREE.MeshBasicMaterial({ color: color })
+      new THREE.MeshStandardMaterial({ color: color })
     );
     cube.oldcolor = color
     cube.tag = false;
@@ -20,11 +20,20 @@ function createCube(color) {
 function createBall(color) { 
     const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(3, 32, 32),
-      new THREE.MeshBasicMaterial({ color: color })
+      new THREE.MeshPhongMaterial({ color: color, flatShading: true })
     );
     sphere.position.set(0,0,-5)
     return sphere;
 };
+
+// function createRoad(color) { 
+//     const road = new THREE.Mesh(
+//       new THREE.PlaneGeometry(5, 5),
+//       new THREE.MeshBasicMaterial({ color: color })
+//     );
+//     road.position.set(0,0,-5)
+//     return road;
+// };
 
 function randColorGen(i) {
     var arr = []
@@ -90,7 +99,7 @@ window.addEventListener("resize", () => {
   });
 
 function ballAnimation(){
-    ball.rotation.x +=0.05
+    ball.rotation.x -=0.05
     if(changing == 1){
         if(ball.position.x!=lanes[lane][0]){
             if(ball.position.x < lanes[lane][0])
