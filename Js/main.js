@@ -33,8 +33,6 @@ var score = 0
 const colors = randColorGen(10);
 var lanes = [[-10,0,-100],[0,0,-100],[10,0,-100]] 
 
-
-
 var changing = 0
 var lane = 1
 var jumping = 0
@@ -75,8 +73,16 @@ function gameloop() {
   score = 0
   jumpStartTime = 0
   gameover = 0
-  ball = createBall(0xf9f9f9)
+  ball = createBall(0x007BC0)
   scene.add(ball)
+  road = createRoad(0x557BC0)
+  road.position.set(0, -5, -5)
+  road.rotation.x = 270 * (pi/180);
+  // road.rotation.z = 3 * (pi/180);
+  scene.add(road)
+  const light = new THREE.DirectionalLight( 0xffffff, 0.85 );
+  light.position.set( 0, 5, 5 )
+  scene.add( light );
   randCube()
   
   function animate(){ 
@@ -95,7 +101,6 @@ function gameloop() {
     if(obj[obj.length-1].position.z >= - 80){
       randCube()
     } 
-    console.log(ball.position)
     if(!gameover){
       ballAnimation()
       renderer.render(scene,camera)
