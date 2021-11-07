@@ -1,3 +1,7 @@
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/build/three.module.js';
+import * as utils from './util.js'
+
+
 const scoreHTML = document.querySelector("#score");
 const start = document.querySelector("#start")
 const scene = new THREE.Scene()
@@ -24,13 +28,13 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize( size.w , size.h);
 renderer.setPixelRatio(window.devicePixelRatio);
 
-
+var obj = []
 var clock = new THREE.Clock();
 var time = 0
 var delta = 0
 var speed = 0.2
 var score = 0
-const colors = randColorGen(10);
+const colors = utils.randColorGen(10);
 var lanes = [[-10,0,-100],[0,0,-100],[10,0,-100]] 
 
 var changing = 0
@@ -40,6 +44,7 @@ var press = 0
 const hmax = 8
 var gameover = 0
 var jumpStartTime = 0
+
 
 scoreHTML.innerHTML = ("Score: " + 0)
 start.addEventListener('click',(e)=> {
@@ -73,9 +78,9 @@ function gameloop() {
   score = 0
   jumpStartTime = 0
   gameover = 0
-  ball = createBall(0x007BC0)
+  var ball = utils.createBall(0x007BC0)
   scene.add(ball)
-  road = createRoad(0x557BC0)
+  var road = utils.createRoad(0x557BC0)
   road.position.set(0, -5, -5)
   road.rotation.x = 270 * (pi/180);
   // road.rotation.z = 3 * (pi/180);
@@ -91,7 +96,7 @@ function gameloop() {
     if (speed <= 0.4)
       speed+=0.005
     obj.forEach((o, index, object)=>{
-      collision(o.position.x,o.position.y,o.position.z)
+      collision(o.position.x,o.position.y,o.position.z,ball)
       o.position.z += speed
       if(o.position.z >= 5) {
         scene.remove(o)
@@ -102,7 +107,7 @@ function gameloop() {
       randCube()
     } 
     if(!gameover){
-      ballAnimation()
+      ballAnimation(ball)
       renderer.render(scene,camera)
       requestAnimationFrame(animate);
     }
@@ -113,3 +118,78 @@ function gameloop() {
   }
 }
 
+
+
+window.addEventListener("resize", () => {
+  size.w = window.innerWidth * 0.8;
+  size.h = window.innerHeight * 0.8;
+  camera.aspect = size.width / size.height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(size.width, size.height);
+  renderer.setPixelRatio(window.devicePixelRatio);
+});
+
+
+function cLane(key){
+  if(key == 'ArrowLeft'){
+      changing = 1 
+      if(lane != 0)
+          lane -= 1
+      
+  }
+  if(key == 'ArrowRight'){
+      changing = 1 
+      if(lane != 2)
+          lane += 1
+  }
+  if(key == 'ArrowUp'){
+      if(!jumping){
+          changing = 1 
+          jumping = 1
+          delta = clock.getDelta();
+          time += delta
+          jumpStartTime = time
+      }
+      
+  }
+}
+
+function randCube(){
+  var amt = utils.radInt(1,3)
+  for (let i = 0; i<amt ; i++) {
+      var cube = utils.createCube(colors[utils.radInt(0,9)],lanes)
+      obj.push(cube)
+      scene.add(cube)
+  }
+}
+
+function ballAnimation(ball){
+  ball.rotation.x -=0.05
+  if(changing == 1){
+      if(ball.position.x!=lanes[lane][0]){
+          if(ball.position.x < lanes[lane][0])
+              ball.position.x += 0.5
+          else 
+              ball.position.x -= 0.5
+      }
+      else {
+          changing = 0
+      }
+  }
+  if (jumping == 1){
+      delta = clock.getDelta();
+      time += delta
+      var jumpClock = time - jumpStartTime;
+      ball.position.y = hmax * Math.sin((1 / (3/4)) * Math.PI * jumpClock) 
+      if (jumpClock > 0.75) {
+          jumping = 0;
+          ball.position.y = 0
+      }
+  }
+}
+
+function collision(x,y,z,ball){
+  if (Math.abs(ball.position.x - x) < 3 && Math.abs(ball.position.y - y) < 3  && Math.abs(ball.position.z - z) < 3){
+      gameover = 1;
+  }
+}
