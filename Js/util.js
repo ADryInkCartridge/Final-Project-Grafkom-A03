@@ -15,6 +15,7 @@ export function createCube(color, lanes) {
     cube.oldcolor = color
     cube.tag = false;
     const pos = radInt(0,2);
+    cube.castShadow = true
     cube.position.set(lanes[pos][0],lanes[pos][1],lanes[pos][2])
     return cube;
 };
@@ -25,6 +26,7 @@ export function createBall(color) {
       new THREE.MeshPhongMaterial({ color: color, flatShading: true })
     );
     sphere.position.set(0,0,-5)
+    sphere.castShadow = true
     return sphere;
 };
 
@@ -33,6 +35,7 @@ export function createRoad(color) {
       new THREE.PlaneGeometry(30, 5000),
       new THREE.MeshPhongMaterial({ color: color })
     );
+    road.receiveShadow = true
     return road;
 };
 

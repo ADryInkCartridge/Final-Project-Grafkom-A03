@@ -2,6 +2,26 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
 import { OrbitControls } from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js';
 import * as utils from './util.js'
 
+const _VS = `
+varying vec3 vWorldPosition;
+void main() {
+  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+  vWorldPosition = worldPosition.xyz;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}`;
+
+
+const _FS = `
+uniform vec3 topColor;
+uniform vec3 bottomColor;
+uniform float offset;
+uniform float exponent;
+varying vec3 vWorldPosition;
+void main() {
+  float h = normalize( vWorldPosition + offset ).y;
+  gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+}`;
+
 main()
 
 async function main(){
@@ -19,8 +39,7 @@ async function main(){
     h : window.innerHeight * 0.8 
   }
 
-  scene.add(new THREE.DirectionalLight(0xffffbb, 1));
-  scene.add(new THREE.AmbientLight(0xffffff, 1));
+ 
   const banana = await utils.loadGlTF('../assets/banana/banana.gltf',100,100,100);
   const camera = new THREE.PerspectiveCamera(90, size.w / size.h,0.1,1000);
   camera.position.set(0, 20, 10);
@@ -32,6 +51,21 @@ async function main(){
   });
   renderer.setSize( size.w , size.h);
   renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  const uniforms = {
+    topColor: { value: new THREE.Color(0x0077FF) },
+    bottomColor: { value: new THREE.Color(0x89b2eb) },
+    offset: { value: 33 },
+    exponent: { value: 0.6 }
+  };
+  const skyGeo = new THREE.SphereBufferGeometry(1000, 32, 15);
+  const skyMat = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: _VS,
+      fragmentShader: _FS,
+      side: THREE.BackSide,
+  });
+  
 
   var obj = []
   var clock = new THREE.Clock();
@@ -99,11 +133,17 @@ async function main(){
     scene.add(road)
     const light = new THREE.DirectionalLight( 0xffffff, 0.85 );
     light.position.set( 0, 5, 5 )
+    light.castShadow = true;
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
+    light.shadow.camera.near = 1;
+    light.shadow.camera.far = 100;
     scene.add( light );
     controls.target.set(0, 0, 0);
     controls.update();  
     randCube()
     console.log(scene)
+    scene.add(new THREE.Mesh(skyGeo, skyMat));
     function animate(){ 
       score++
       scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
