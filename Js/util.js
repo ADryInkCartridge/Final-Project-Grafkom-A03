@@ -9,7 +9,6 @@ export function radInt(min, max) {
 }
 
 export function createCube(color, lanes) { 
-    // console.log(color)
     const cube = new THREE.Mesh(
       new THREE.BoxGeometry(3, 3, 3),
       new THREE.MeshStandardMaterial({ color: color })
@@ -46,7 +45,17 @@ export function randColorGen(i) {
     return arr;
 }
 
-
+export async function loadFBX(asset,x,y,z) {
+    const fbxLoader = new FBXLoader()
+    return new Promise((resolve, reject) => {
+        fbxLoader.load(asset, data=>{
+            data.traverse(function (child) {
+            child.castShadow = true;
+        })
+        data.scale.set(x,y,z)
+        resolve(data)} , null, reject);
+  });
+}
 
 
 
