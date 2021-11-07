@@ -1,9 +1,11 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/build/three.module.js';
+import { OrbitControls } from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js';
 import * as utils from './util.js'
 
 main()
 
 async function main(){
+  
   const scoreHTML = document.querySelector("#score");
   const start = document.querySelector("#start")
   const scene = new THREE.Scene()
@@ -19,8 +21,7 @@ async function main(){
 
   scene.add(new THREE.DirectionalLight(0xffffbb, 1));
   scene.add(new THREE.AmbientLight(0xffffff, 1));
-  const banana = await utils.loadFBX('../assets/Banana3.fbx',1,1,1);
-
+  const banana = await utils.loadGlTF('../assets/banana/banana.gltf',100,100,100);
   const camera = new THREE.PerspectiveCamera(90, size.w / size.h,0.1,1000);
   camera.position.set(0, 20, 10);
   const pi = Math.PI;
@@ -50,17 +51,15 @@ async function main(){
   var jumpStartTime = 0
   renderer.render(scene,camera)
 
-
+  const controls = new OrbitControls(camera, canvas);
   scoreHTML.innerHTML = ("Score: " + 0)
   start.addEventListener('click',(e)=> {
-    console.log(banana)
     banana.position.set(-10,0,-50)
-    scene.add(banana)
-    console.log(scene)
     gameloop()
   })
 
   function gameloop() {
+    
     const x = document
     x.addEventListener('keydown', res)
     
@@ -87,6 +86,10 @@ async function main(){
     score = 0
     jumpStartTime = 0
     gameover = 0
+    banana.name = 'banana'
+    scene.add(banana)
+    console.log(scene)
+    console.log(banana)
     var ball = utils.createBall(0x007BC0)
     scene.add(ball)
     var road = utils.createRoad(0x557BC0)
@@ -97,25 +100,26 @@ async function main(){
     const light = new THREE.DirectionalLight( 0xffffff, 0.85 );
     light.position.set( 0, 5, 5 )
     scene.add( light );
+    controls.target.set(0, 0, 0);
+    controls.update();  
     randCube()
-    
+    console.log(scene)
     function animate(){ 
-      // console.log(scene)
-      // score++
-      // scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
-      // if (speed <= 0.4)
-      //   speed+=0.005
-      // obj.forEach((o, index, object)=>{
-      //   collision(o.position.x,o.position.y,o.position.z,ball)
-      //   o.position.z += speed
-      //   if(o.position.z >= 5) {
-      //     scene.remove(o)
-      //     object.splice(index, 1);
-      //   } 
-      // })
-      // if(obj[obj.length-1].position.z >= - 80){
-      //   randCube()
-      // } 
+      score++
+      scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
+      if (speed <= 0.4)
+        speed+=0.005
+      obj.forEach((o, index, object)=>{
+        collision(o.position.x,o.position.y,o.position.z,ball)
+        o.position.z += speed
+        if(o.position.z >= 5) {
+          scene.remove(o)
+          object.splice(index, 1);
+        } 
+      })
+      if(obj[obj.length-1].position.z >= - 80){
+        randCube()
+      } 
       if(!gameover){
         ballAnimation(ball)
         renderer.render(scene,camera)

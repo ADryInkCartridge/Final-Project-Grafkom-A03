@@ -1,6 +1,5 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/build/three.module.js';
 import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js';
-import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
 
 export function radInt(min, max) {
     min = Math.ceil(min);
@@ -45,15 +44,16 @@ export function randColorGen(i) {
     return arr;
 }
 
-export async function loadFBX(asset,x,y,z) {
-    const fbxLoader = new FBXLoader()
+export async function loadGlTF(asset,x,y,z) {
+    const gltfLoader = new GLTFLoader()
     return new Promise((resolve, reject) => {
-        fbxLoader.load(asset, data=>{
-            data.traverse(function (child) {
+        gltfLoader.load(asset, data=>{
+            let root = data.scene
+            root.traverse(function (child) {
             child.castShadow = true;
         })
-        data.scale.set(x,y,z)
-        resolve(data)} , null, reject);
+        root.scale.set(x,y,z)
+        resolve(root)} , null, reject);
   });
 }
 
