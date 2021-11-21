@@ -40,7 +40,7 @@ async function main(){
   }
 
  
-  const banana = await utils.loadGlTF('../assets/banana/banana.gltf',100,100,100);
+  const banana = await utils.loadGlTF('../assets/banana/banana.gltf',10,10,10);
   const camera = new THREE.PerspectiveCamera(90, size.w / size.h,0.1,1000);
   camera.position.set(0, 20, 10);
   const pi = Math.PI;
@@ -68,6 +68,7 @@ async function main(){
   
 
   var obj = []
+  var bananaList = []
   var clock = new THREE.Clock();
   var time = 0
   var delta = 0
@@ -88,7 +89,6 @@ async function main(){
   const controls = new OrbitControls(camera, canvas);
   scoreHTML.innerHTML = ("Score: " + 0)
   start.addEventListener('click',(e)=> {
-    banana.position.set(-10,0,-50)
     gameloop()
   })
 
@@ -120,16 +120,12 @@ async function main(){
     score = 0
     jumpStartTime = 0
     gameover = 0
-    banana.name = 'banana'
-    scene.add(banana)
-    console.log(scene)
-    console.log(banana)
     var ball = utils.createBall(0x007BC0)
     scene.add(ball)
     var road = utils.createRoad(0x557BC0)
     road.position.set(0, -5, -5)
     road.rotation.x = 270 * (pi/180);
-    // road.rotation.z = 3 * (pi/180);
+
     scene.add(road)
     const light = new THREE.DirectionalLight( 0xffffff, 0.85 );
     light.position.set( 0, 5, 5 )
@@ -150,7 +146,7 @@ async function main(){
       if (speed <= 0.4)
         speed+=0.005
       obj.forEach((o, index, object)=>{
-        collision(o.position.x,o.position.y,o.position.z,ball)
+        //collision(o.position.x,o.position.y,o.position.z,ball)
         o.position.z += speed
         if(o.position.z >= 5) {
           scene.remove(o)
@@ -158,10 +154,12 @@ async function main(){
         } 
       })
       if(obj[obj.length-1].position.z >= - 80){
-        randCube()
+        // randCube()
+        randBanana()
       } 
       if(!gameover){
         ballAnimation(ball)
+        bananaAnimation(bananaList);
         renderer.render(scene,camera)
         requestAnimationFrame(animate);
       }
@@ -216,6 +214,17 @@ async function main(){
         scene.add(cube)
     }
   }
+  function randBanana(){
+    var amt = utils.radInt(1,2)
+    for (let i = 0; i<amt ; i++) {
+        var pos = utils.radInt(0,2)
+        var newBanana = banana.clone()
+        newBanana.position.set(lanes[pos][0],lanes[pos][1],lanes[pos][2])
+        obj.push(newBanana)
+        scene.add(newBanana)
+        bananaList.push(newBanana)
+    }
+  }
 
   function ballAnimation(ball){
     ball.rotation.x -=0.05
@@ -240,6 +249,13 @@ async function main(){
             ball.position.y = 0
         }
     }
+  }
+
+  function bananaAnimation(bananaList){
+    bananaList.forEach((b,index,object)=>{
+        b.rotation.y -=0.005
+    })
+    
   }
 
   function collision(x,y,z,ball){
