@@ -30,7 +30,7 @@ async function main(){
   const start = document.querySelector("#start")
   const scene = new THREE.Scene()
 
-  scene.background = new THREE.Color(0x121212);
+  scene.background = new THREE.Color(0xffffff);
 
   const canvas = document.querySelector("#bg");
 
@@ -42,10 +42,12 @@ async function main(){
  
   const banana = await utils.loadGlTF('../assets/banana/banana.gltf',10,10,10);
   const camera = new THREE.PerspectiveCamera(90, size.w / size.h,0.1,1000);
-  camera.position.set(0, 20, 10);
+  camera.position.set(20, 30, 15);
   const pi = Math.PI;
   camera.rotation.y = 360 * (pi/180);
-  camera.rotation.x = -30 * (pi/180);
+  camera.rotation.x = -30 * (pi / 180);
+  camera.rotation.z = -120 * (pi/180);
+
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
   });
@@ -58,7 +60,7 @@ async function main(){
     offset: { value: 33 },
     exponent: { value: 0.6 }
   };
-  const skyGeo = new THREE.SphereBufferGeometry(1000, 32, 15);
+  const skyGeo = new THREE.SphereBufferGeometry(1000, 0, 0);
   const skyMat = new THREE.ShaderMaterial({
       uniforms: uniforms,
       vertexShader: _VS,
@@ -94,6 +96,7 @@ async function main(){
 
   function gameloop() {
     
+    
     const x = document
     x.addEventListener('keydown', res)
     
@@ -120,18 +123,24 @@ async function main(){
     score = 0
     jumpStartTime = 0
     gameover = 0
+    banana.name = 'banana'
+    scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+    // scene.add(banana)
+    // console.log(scene)
+    // console.log(banana)
     var ball = utils.createBall(0x007BC0)
     scene.add(ball)
     var road = utils.createRoad(0x557BC0)
-    road.position.set(0, -5, -5)
+    road.position.set(0, -3, -5)
     road.rotation.x = 270 * (pi/180);
 
     scene.add(road)
-    const light = new THREE.DirectionalLight( 0xffffff, 0.85 );
-    light.position.set( 0, 5, 5 )
+    const light = new THREE.SpotLight( 0xffffff );
+    light.position.set( -3, 50, 0 )
     light.castShadow = true;
-    light.shadow.mapSize.width = 1024;
-    light.shadow.mapSize.height = 1024;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
     light.shadow.camera.near = 1;
     light.shadow.camera.far = 100;
     scene.add( light );
@@ -139,7 +148,6 @@ async function main(){
     controls.update();  
     randCube()
     console.log(scene)
-    scene.add(new THREE.Mesh(skyGeo, skyMat));
     function animate(){ 
       score++
       scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
@@ -209,7 +217,8 @@ async function main(){
   function randCube(){
     var amt = utils.radInt(1,3)
     for (let i = 0; i<amt ; i++) {
-        var cube = utils.createCube(colors[utils.radInt(0,9)],lanes)
+      var cube = utils.createCube(colors[utils.radInt(0, 9)], lanes)
+      cube.position.y = -1.5
         obj.push(cube)
         scene.add(cube)
     }
