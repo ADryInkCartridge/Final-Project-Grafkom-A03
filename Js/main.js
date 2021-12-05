@@ -1,6 +1,7 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/build/three.module.js';
 import { OrbitControls } from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js';
 import * as utils from './util.js'
+import * as Howler from 'https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js'
 
 const _VS = `
 varying vec3 vWorldPosition;
@@ -25,6 +26,24 @@ void main() {
 main()
 
 async function main(){
+
+  const bananaSound = new Howl({
+    src: ['./assets/music/banana.wav'],
+    volume : 0.5
+  });
+  const jumpSound = new Howl({
+    src: ['./assets/music/jump.wav'],
+    volume : 0.5
+  });
+  const overSound = new Howl({
+    src: ['./assets/music/gameover.wav'],
+    volume : 0.5
+  });
+  const bgm = new Howl({
+    src: ['./assets/music/bgm.mp3'],
+    loop: true,
+    html5 : true
+  });
   
   const scoreHTML = document.querySelector("#score");
   const start = document.querySelector("#start")
@@ -40,7 +59,23 @@ async function main(){
   }
 
  
+  var treeMap = []
+  var rockMap = []
   const banana = await utils.loadGlTF('../assets/banana/banana.gltf',10,10,10);
+  const trees = await utils.loadGlTF('../assets/low_poly_trees/scene.gltf',5,5,5);
+  trees.traverse(child => {
+    if(child.name[0] == '_' && child.type == 'Object3D'){
+      // console.log(child);
+      child.scale.set(1,1,1)
+      treeMap.push(child)
+    }
+    if(child.name == "Rock_1_"){
+      child.scale.set(1,1,1)
+      rockMap.push(child)
+    }
+  });
+
+  console.log(trees);
   const camera = new THREE.PerspectiveCamera(90, size.w / size.h,0.1,1000);
   camera.position.set(20, 30, 15);
   const pi = Math.PI;
@@ -77,20 +112,25 @@ async function main(){
   var speed = 0.2
   var score = 0
   const colors = utils.randColorGen(10);
-  var lanes = [[-10,0,-100],[0,0,-100],[10,0,-100]] 
-
+  const lanes = [[-10,0,-100],[0,0,-100],[10,0,-100],[-10,5,-100],[0,5,-100],[10,5,-100]] 
+  const treePos = [[-15,0,-100],[-18,0,-100],[-20,0,-100],[15,0,-100],[18,0,-100],[20,0,-100]] 
   var changing = 0
   var lane = 1
   var jumping = 0
   var press = 0
   const hmax = 8
+  var spect = 0
   var gameover = 0
   var jumpStartTime = 0
   renderer.render(scene,camera)
-
+ 
   const controls = new OrbitControls(camera, canvas);
   scoreHTML.innerHTML = ("Score: " + 0)
   start.addEventListener('click',(e)=> {
+    bananaSound.play()
+    if (!bgm.playing()) {
+      bgm.play()
+    }
     gameloop()
   })
 
@@ -100,9 +140,20 @@ async function main(){
     const x = document
     x.addEventListener('keydown', res)
     
+    function animate2(){ 
+      renderer.render(scene,camera)
+      requestAnimationFrame(animate2);
+      if (spect == 0){
+        return
+      }
+    }
+    animate2()
+
     function res(e){
-      if (press==0)
+      if (press==0){
+        spect = 0
         animate()
+      }
       press++
       var key = e.code;
       cLane(key)
@@ -125,10 +176,7 @@ async function main(){
     gameover = 0
     banana.name = 'banana'
     scene.add(new THREE.Mesh(skyGeo, skyMat));
-
-    // scene.add(banana)
-    // console.log(scene)
-    // console.log(banana)
+    
     var ball = utils.createBall(0x007BC0)
     scene.add(ball)
     var road = utils.createRoad(0x557BC0)
@@ -146,24 +194,31 @@ async function main(){
     scene.add( light );
     controls.target.set(0, 0, 0);
     controls.update();  
-    randCube()
+    terrain()
+    obstacle()
     console.log(scene)
     function animate(){ 
-      score++
-      scoreHTML.innerHTML = ("Score: " + Math.floor(score / 10))
+      scoreHTML.innerHTML = ("Score: " + score)
       if (speed <= 0.4)
         speed+=0.005
       obj.forEach((o, index, object)=>{
-        //collision(o.position.x,o.position.y,o.position.z,ball)
+        const ret = collision(o.name,o.position.x,o.position.y,o.position.z,index,ball)
+        if (ret == 0 ){
+          gameover = 1
+        }
+        if (ret == 2){
+          o.name = 'noSound'
+          scene.remove(o)
+        }
         o.position.z += speed
-        if(o.position.z >= 5) {
+        if(o.position.z >= 25) {
           scene.remove(o)
           object.splice(index, 1);
         } 
       })
       if(obj[obj.length-1].position.z >= - 80){
-        // randCube()
-        randBanana()
+        obstacle()
+        terrain()
       } 
       if(!gameover){
         ballAnimation(ball)
@@ -172,7 +227,9 @@ async function main(){
         requestAnimationFrame(animate);
       }
       else {
+        overSound.play()
         x.removeEventListener("keydown", res);
+        spect = 1
         return
       }
     }
@@ -204,6 +261,9 @@ async function main(){
     }
     if(key == 'ArrowUp'){
         if(!jumping){
+            if(!jumpSound.playing()){
+              jumpSound.play()
+            }
             changing = 1 
             jumping = 1
             delta = clock.getDelta();
@@ -214,26 +274,86 @@ async function main(){
     }
   }
 
-  function randCube(){
-    var amt = utils.radInt(1,3)
+  function obstacle(){ 
+    var positions = []
+    var amt = utils.radInt(0,3)
     for (let i = 0; i<amt ; i++) {
-      var cube = utils.createCube(colors[utils.radInt(0, 9)], lanes)
-      cube.position.y = -1.5
-        obj.push(cube)
-        scene.add(cube)
+      const cube = utils.createCube(colors[utils.radInt(0, 9)])
+      var pos = utils.radInt(0,5)
+      while(pos == null || positions.includes(pos)){
+        pos = utils.radInt(0,5)
+      } 
+      positions.push(pos)
+      cube.position.set(lanes[pos][0],lanes[pos][1] - 1.5,lanes[pos][2])
+      cube.name = 'obstacle'
+      obj.push(cube)
+      scene.add(cube)
     }
-  }
-  function randBanana(){
-    var amt = utils.radInt(1,2)
+    amt = utils.radInt(1,3)
+
     for (let i = 0; i<amt ; i++) {
-        var pos = utils.radInt(0,2)
+        while(pos == null || positions.includes(pos)){
+          pos = utils.radInt(0,5)
+        } 
         var newBanana = banana.clone()
+        newBanana.name = 'banana'
+        console.log(pos)
         newBanana.position.set(lanes[pos][0],lanes[pos][1],lanes[pos][2])
         obj.push(newBanana)
         scene.add(newBanana)
         bananaList.push(newBanana)
     }
   }
+
+  function terrain(){
+    var positions = []
+    var amt = utils.radInt(0,6)
+    for (let i = 0; i<amt ; i++) {
+      var pos = utils.radInt(0,5)
+      while(pos == null || positions.includes(pos)){
+        pos = utils.radInt(0,5)
+      } 
+      var newTree = treeMap[utils.radInt(0,11)].clone()
+      newTree.name = 'tree'
+      newTree.position.set(treePos[pos][0],treePos[pos][1],treePos[pos][2])
+      obj.push(newTree)
+      scene.add(newTree)
+    }
+    amt = utils.radInt(0,2)
+    for (let i = 0; i<amt ; i++) {
+      pos = utils.radInt(0,5)
+      while(pos == null || positions.includes(pos)){
+        pos = utils.radInt(0,5)
+      } 
+      var newRock =rockMap[0].clone()
+      newRock.name = 'rock'
+      newRock.position.set(treePos[pos][0],treePos[pos][1]-1.5,treePos[pos][2]+2)
+      obj.push(newRock)
+      scene.add(newRock)
+    }
+  }
+
+  // function randCube(){
+  //   var amt = utils.radInt(1,3)
+  //   for (let i = 0; i<amt ; i++) {
+  //     var cube = utils.createCube(colors[utils.radInt(0, 9)])
+  //     cube.position.y = -1.5
+  //       obj.push(cube)
+  //       scene.add(cube)
+  //   }
+  // }
+  // function randBanana(){
+  //   var amt = utils.radInt(1,2)
+  //   for (let i = 0; i<amt ; i++) {
+  //       var pos = utils.radInt(0,2)
+  //       var newBanana = banana.clone()
+  //       newBanana.name = 'banana'
+  //       newBanana.position.set(lanes[pos][0],lanes[pos][1],lanes[pos][2])
+  //       obj.push(newBanana)
+  //       scene.add(newBanana)
+  //       bananaList.push(newBanana)
+  //   }
+  // }
 
   function ballAnimation(ball){
     ball.rotation.x -=0.05
@@ -261,15 +381,35 @@ async function main(){
   }
 
   function bananaAnimation(bananaList){
-    bananaList.forEach((b,index,object)=>{
+    bananaList.forEach((b)=>{
         b.rotation.y -=0.005
     })
-    
   }
 
-  function collision(x,y,z,ball){
+  function collision(name,x,y,z,index,ball){
     if (Math.abs(ball.position.x - x) < 3 && Math.abs(ball.position.y - y) < 3  && Math.abs(ball.position.z - z) < 3){
-        gameover = 1;
+        console.log(name)
+        if (name == 'banana'){
+          score++
+          if (bananaSound.playing()){
+            const sec = bananaSound.seek()
+            console.log(sec)
+            if (sec <= 0.2)
+              bananaSound.stop()
+              bananaSound.play()
+          } 
+          else {
+            bananaSound.play()
+          }
+          return 2;
+        }
+        if (name == 'noSound'){
+          return 1;
+        }
+        if (name == 'obstacle'){
+          return 0;
+        }
     }
   }
+
 }

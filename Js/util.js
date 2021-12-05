@@ -7,16 +7,14 @@ export function radInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function createCube(color, lanes) { 
+export function createCube(color) { 
     const cube = new THREE.Mesh(
       new THREE.BoxGeometry(3, 3, 3),
       new THREE.MeshStandardMaterial({ color: color })
     );
     cube.oldcolor = color
     cube.tag = false;
-    const pos = radInt(0,2);
     cube.castShadow = true
-    cube.position.set(lanes[pos][0],lanes[pos][1],lanes[pos][2])
     return cube;
 };
 
@@ -33,7 +31,7 @@ export function createBall(color) {
 
 export function createRoad(color) { 
     const road = new THREE.Mesh(
-      new THREE.PlaneGeometry(30, 5000),
+      new THREE.PlaneGeometry(50, 5000),
       new THREE.MeshPhongMaterial({ color: color })
     );
     road.receiveShadow = true
