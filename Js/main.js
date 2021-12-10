@@ -4,6 +4,9 @@ import {
 } from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js';
 import * as utils from './util.js'
 import * as Howler from 'https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js'
+import {
+  GLTFLoader
+} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js';
 
 const _VS = `
 varying vec3 vWorldPosition;
@@ -63,8 +66,13 @@ async function main() {
 
   var treeMap = []
   var rockMap = []
-  const banana = await utils.loadGlTF('../assets/banana/banana.gltf', 10, 10, 10);
+  const banana = await utils.loadGlTF('../assets/bone_low-poly_game_ready/scene.gltf', 0.2, 0.2, 0.2);
   const trees = await utils.loadGlTF('../assets/low_poly_trees/scene.gltf', 5, 5, 5);
+  const box = await utils.loadGlTF('../assets/apple_crate/scene.gltf', 0.75, 0.75, 0.75);
+  var shibaAni
+  shibaAni = await utils.loadGlTF2();
+  var shib = shibaAni[0]
+  var mixer = shibaAni[1]
   trees.traverse(child => {
     if (child.name[0] == '_' && child.type == 'Object3D') {
       // console.log(child);
@@ -154,6 +162,8 @@ async function main() {
   let skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
   let skybox = new THREE.Mesh(skyboxGeo, materialArray);
 
+  var clock2 = new THREE.Clock();
+  var loader = new GLTFLoader();
 
   var obj = []
   var bananaList = []
@@ -162,6 +172,7 @@ async function main() {
   var delta = 0
   var speed = 0.2
   var score = 0
+  var mixer
   const colors = utils.randColorGen(10);
   const lanes = [
     [-10, 0, -100],
@@ -196,6 +207,7 @@ async function main() {
     if (!bgm.playing()) {
       bgm.play()
     }
+    
     gameloop()
   })
 
@@ -244,13 +256,16 @@ async function main() {
     scene.add(skybox);
 
     var ball = utils.createBall(0x007BC0)
-    scene.add(ball)
+    // scene.add(ball)
+    shib.position.set(0, 0, -5)
+    scene.add(shib)
     var road = utils.createRoad(0x557BC0)
     road.position.set(0, -3, -5)
     road.rotation.x = 270 * (pi / 180);
     scene.fog = new THREE.Fog(0x000000,1, 150);
     scene.add(road)
     const light = new THREE.SpotLight(0xffffff);
+    const ambi = new THREE.AmbientLight(0xffffff,0.5);
     light.position.set(-3, 50, 0)
     light.castShadow = true;
     light.shadow.mapSize.width = 2048;
@@ -258,14 +273,18 @@ async function main() {
     light.shadow.camera.near = 1;
     light.shadow.camera.far = 100;
     scene.add(light);
+    scene.add(ambi);
     controls.target.set(0, 0, 0);
     controls.update();
     terrain()
     obstacle()
 
-    console.log(scene)
+    console.log("AAAAA")
+    console.log(shib)
 
     function animate() {
+      var delta = clock2.getDelta();
+			if ( mixer ) mixer.update( delta );
       scoreHTML.innerHTML = ("Score: " + score)
       if (speed <= 0.4)
         speed += 0.005
@@ -352,16 +371,16 @@ async function main() {
     var positions = []
     var amt = utils.radInt(0, 3)
     for (let i = 0; i < amt; i++) {
-      const cube = utils.createCube(colors[utils.radInt(0, 9)])
       var pos = utils.radInt(0, 5)
       while (pos == null || positions.includes(pos)) {
         pos = utils.radInt(0, 5)
       }
       positions.push(pos)
-      cube.position.set(lanes[pos][0], lanes[pos][1] - 1.5, lanes[pos][2])
-      cube.name = 'obstacle'
-      obj.push(cube)
-      scene.add(cube)
+      const newBox = box.clone()
+      newBox.position.set(lanes[pos][0], lanes[pos][1] - 1.5, lanes[pos][2])
+      newBox.name = 'obstacle'
+      obj.push(newBox)
+      scene.add(newBox)
     }
     amt = utils.radInt(1, 3)
 
@@ -433,10 +452,15 @@ async function main() {
     ball.rotation.x -= 0.05
     if (changing == 1) {
       if (ball.position.x != lanes[lane][0]) {
-        if (ball.position.x < lanes[lane][0])
+        if (ball.position.x < lanes[lane][0]) {
           ball.position.x += 0.5
+          shib.position.x += 0.5
+        }
         else
-          ball.position.x -= 0.5
+          {
+            ball.position.x -= 0.5
+            shib.position.x -= 0.5
+          }
       } else {
         changing = 0
       }
@@ -446,9 +470,11 @@ async function main() {
       time += delta
       var jumpClock = time - jumpStartTime;
       ball.position.y = hmax * Math.sin((1 / (3 / 4)) * Math.PI * jumpClock)
+      shib.position.y = hmax * Math.sin((1 / (3 / 4)) * Math.PI * jumpClock)
       if (jumpClock > 0.75) {
         jumping = 0;
         ball.position.y = 0
+        shib.position.y = 0
       }
     }
   }

@@ -73,3 +73,24 @@ export async function loadGlTF(asset, x, y, z) {
         }, null, reject);
     });
 }
+
+export async function loadGlTF2() {
+    const loader = new GLTFLoader()
+    return new Promise((resolve, reject) => {
+        loader.load( 'assets/wolf/ShibaInu.gltf', function ( gltf ) {
+            gltf.scene.name = 'ShibaInu'
+            gltf.scene.traverse(function (child) {
+                    child.castShadow = true;
+                })
+            gltf.scene.scale.set(2, 2, 2)
+            gltf.scene.rotation.y = -Math.PI 
+            var mixer = new THREE.AnimationMixer( gltf.scene );
+            gltf.animations.forEach( ( clip ) => {
+                mixer.clipAction( clip ).play();
+            });  
+            var arr = [gltf.scene, mixer]
+            resolve(arr)
+          }, null, reject);
+    });
+    
+}
