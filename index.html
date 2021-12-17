@@ -7,11 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Play</title>
   </head>
-  <body>
-    <div class="items-center text-xl flex flex-col">
-      <button class="bg-blue-400 rounded-md px-1 py-1 mb-2" type="button" id="start">Reset!</button>
+  <body style="background-image: url('/assets/bg.png');" class="">
+    <div class="items-center text-xl flex flex-col py-6">
+      <img src="/assets/logo.png" alt="" class="h-20">
+      <button class="bg-black rounded-md px-10 py-1 mb-2 text-white shadow-lg border-2 border-gray-400" type="button" id="start">
+        <img src="/assets/play.png" alt="" class="h-10">
+      </button>
       <div>
-        <p id="score">Score: </p>
+        <p id="score" class="text-white">Score: </p>
         <canvas id="bg"></canvas>
       </div>
     </div>

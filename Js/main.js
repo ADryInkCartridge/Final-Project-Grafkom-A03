@@ -59,8 +59,8 @@ async function main() {
   const canvas = document.querySelector("#bg");
 
   const size = {
-    w: window.innerWidth * 0.8,
-    h: window.innerHeight * 0.8
+    w: window.innerWidth * 0.7,
+    h: window.innerHeight * 0.7
   }
 
 
@@ -321,6 +321,7 @@ async function main() {
         requestAnimationFrame(animate);
       } else {
         overSound.play()
+        bgm.pause()
         x.removeEventListener("keydown", res);
         spect = 1
         return
