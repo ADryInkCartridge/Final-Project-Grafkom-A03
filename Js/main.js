@@ -257,7 +257,7 @@ async function main() {
 
     var ball = utils.createBall(0x007BC0)
     // scene.add(ball)
-    shib.position.set(0, 0, -5)
+    shib.position.set(0, -3, -5)
     scene.add(shib)
     var road = utils.createRoad(0x557BC0)
     road.position.set(0, -3, -5)
@@ -471,10 +471,10 @@ async function main() {
       var jumpClock = time - jumpStartTime;
       ball.position.y = hmax * Math.sin((1 / (3 / 4)) * Math.PI * jumpClock)
       shib.position.y = hmax * Math.sin((1 / (3 / 4)) * Math.PI * jumpClock)
-      if (jumpClock > 0.75) {
+      if (jumpClock > 0.85) {
         jumping = 0;
         ball.position.y = 0
-        shib.position.y = 0
+        shib.position.y = -3
       }
     }
   }
